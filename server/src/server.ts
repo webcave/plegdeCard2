@@ -97,19 +97,37 @@ app.post('/api/campaigns', async (req, res) => {
 app.get('/api/campaigns', async (req, res) => {
   try {
     console.log('Attempting to fetch campaigns from database...');
+    // First try a simple query without relations
     const campaigns = await prisma.campaign.findMany({
+      select: {
+        id: true,
+        title: true,
+        code: true,
+        description: true,
+        targetAmount: true,
+        currentAmount: true,
+        organizerName: true,
+        organizerContact: true,
+        location: true,
+        category: true,
+        imageUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            contributions: true
+          }
+        }
+      },
       orderBy: {
         createdAt: 'desc'
-      },
-      include: {
-        contributions: true
       }
     });
+    
     console.log('Successfully fetched campaigns:', campaigns.length);
     res.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    // Check if it's a Prisma error
     if (error instanceof Error) {
       console.error('Error details:', {
         name: error.name,

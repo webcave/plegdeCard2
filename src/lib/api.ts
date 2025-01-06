@@ -51,11 +51,21 @@ interface SignupData {
 export const api = {
   campaigns: {
     list: async (): Promise<Campaign[]> => {
-      const response = await fetch(`${API_URL}/api/campaigns`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch campaigns');
+      try {
+        const response = await fetch(`${API_URL}/api/campaigns`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch campaigns');
+        }
+        const data = await response.json();
+        return data.map((campaign: any) => ({
+          ...campaign,
+          contributionsCount: campaign._count?.contributions || 0
+        }));
+      } catch (error) {
+        console.error('Error fetching campaigns:', error);
+        throw error;
       }
-      return response.json();
     },
     create: async (campaign: Omit<Campaign, 'id' | 'currentAmount' | 'createdAt' | 'updatedAt'>): Promise<Campaign> => {
       const response = await fetch(`${API_URL}/api/campaigns`, {
