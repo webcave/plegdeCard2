@@ -56,6 +56,28 @@ app.use(express.json({ limit: '10mb' }));
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../../public_html')));
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('Database connection successful');
+    res.json({ 
+      status: 'healthy',
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(500).json({ 
+      status: 'unhealthy',
+      database: 'disconnected',
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Campaign endpoints
 app.post('/api/campaigns', async (req, res) => {
   try {
@@ -74,6 +96,7 @@ app.post('/api/campaigns', async (req, res) => {
 
 app.get('/api/campaigns', async (req, res) => {
   try {
+    console.log('Attempting to fetch campaigns from database...');
     const campaigns = await prisma.campaign.findMany({
       orderBy: {
         createdAt: 'desc'
@@ -82,10 +105,22 @@ app.get('/api/campaigns', async (req, res) => {
         contributions: true
       }
     });
+    console.log('Successfully fetched campaigns:', campaigns.length);
     res.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    res.status(500).json({ error: 'Failed to fetch campaigns' });
+    // Check if it's a Prisma error
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
+    res.status(500).json({ 
+      error: 'Failed to fetch campaigns',
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 
@@ -364,6 +399,18 @@ app.get('/api/users', async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Error fetching users', details: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+// Add Prisma error handling middleware
+app.use((error: any, req: any, res: any, next: any) => {
+  console.error('Global error handler caught:', error);
+  if (error?.code === 'P2002') {
+    res.status(400).json({ error: 'Unique constraint violation' });
+  } else if (error?.code?.startsWith('P')) {
+    res.status(500).json({ error: 'Database error', details: error.message });
+  } else {
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
