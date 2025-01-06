@@ -13,24 +13,44 @@ const prisma = new PrismaClient({
 
 const app = express();
 
-// Add request logging middleware
+// Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
   next();
 });
 
+// CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://jade-meringue-d415f7.netlify.app',
+  'https://pledgewise-uganda.netlify.app',
+  'https://pledgecard.gepfinance.com'
+];
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://jade-meringue-d415f7.netlify.app',
-    'https://677c38e179adcf3317488fda--jade-meringue-d415f7.netlify.app',
-    'https://pledgewise-uganda.netlify.app',
-    'https://pledgecard.gepfinance.com'
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all Netlify preview deployments
+    if (origin.endsWith('netlify.app')) {
+      return callback(null, true);
+    }
+    
+    // Check if origin is in allowedOrigins
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 
 // Serve static files from the React app
