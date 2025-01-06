@@ -10,6 +10,7 @@ export interface Campaign {
   location: string;
   category: string;
   imageUrl?: string;
+  creatorId: number;
   createdAt: string;
   updatedAt: string;
   contributions?: Contribution[];

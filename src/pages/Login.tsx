@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
@@ -46,19 +47,23 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 p-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">
-            {isLogin ? "Welcome Back" : "Create Account"}
-          </h1>
-          <p className="text-muted-foreground mt-2">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2 flex flex-col items-center">
+          <img
+            src="/logo.png"
+            alt="PledgeWise Uganda Logo"
+            className="w-32 h-32 object-contain mb-4"
+          />
+          <CardTitle className="text-2xl font-bold text-center">
+            {isLogin ? 'Welcome Back' : 'Create an Account'}
+          </CardTitle>
+          <CardDescription className="text-center">
             {isLogin
-              ? "Sign in to manage your campaigns"
-              : "Sign up to start creating campaigns"}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+              ? 'Sign in to your account to continue'
+              : 'Sign up to start creating and supporting campaigns'}
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 p-8">
           {!isLogin && (
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -103,7 +108,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="text-center">
+        <div className="text-center p-8">
           <Button
             variant="link"
             onClick={() => {
@@ -118,7 +123,7 @@ export default function Login() {
               : "Already have an account? Sign in"}
           </Button>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

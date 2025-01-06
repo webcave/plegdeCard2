@@ -66,6 +66,31 @@ app.get('/api/campaigns/:id', async (req, res) => {
   }
 });
 
+// Update campaign endpoint
+app.put('/api/campaigns/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, goal, category, location, image } = req.body;
+
+    const updatedCampaign = await prisma.campaign.update({
+      where: { id: parseInt(id) },
+      data: {
+        title,
+        description,
+        goal: parseFloat(goal),
+        category,
+        location,
+        image
+      }
+    });
+
+    res.json(updatedCampaign);
+  } catch (error) {
+    console.error('Error updating campaign:', error);
+    res.status(500).json({ error: 'Failed to update campaign' });
+  }
+});
+
 // Contribution endpoints
 app.post('/api/campaigns/:id/contribute', async (req, res) => {
   try {

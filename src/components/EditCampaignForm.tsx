@@ -1,137 +1,98 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Campaign } from "@/types/campaign";
-import { Upload } from "lucide-react";
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Campaign } from '@/types/campaign';
+import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+import { FormFields } from './campaign-form/FormFields';
+import { ImageUpload } from './campaign-form/ImageUpload';
 
 interface EditCampaignFormProps {
   campaign: Campaign;
-  onSubmit: (campaign: Campaign) => void;
+  onClose: () => void;
 }
 
-export function EditCampaignForm({ campaign, onSubmit }: EditCampaignFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<Campaign>({
-    defaultValues: campaign
+export function EditCampaignForm({ campaign, onClose }: EditCampaignFormProps) {
+  const [formData, setFormData] = useState({
+    title: campaign.title,
+    description: campaign.description,
+    targetAmount: campaign.targetAmount.toString(),
+    location: campaign.location,
+    category: campaign.category,
+    image: campaign.imageUrl,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(campaign.imageUrl || null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = async (data: Campaign) => {
+  const handleImageChange = (imageUrl: string) => {
+    setFormData((prev) => ({ ...prev, image: imageUrl }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+
     try {
-      const updatedCampaign = {
-        ...data,
-        imageUrl: previewImage || data.imageUrl,
-        updatedAt: new Date().toISOString(),
-      };
-      onSubmit(updatedCampaign);
+      await api.campaigns.update(campaign.id, {
+        ...formData,
+        targetAmount: parseFloat(formData.targetAmount),
+      });
+
+      queryClient.invalidateQueries(['campaigns']);
+      toast({
+        title: 'Success',
+        description: 'Campaign updated successfully',
+      });
+      onClose();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update campaign',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div>
-        <Input
-          placeholder="Campaign Title"
-          {...register("title", { required: "Title is required" })}
-        />
-        {errors.title && (
-          <p className="text-sm text-red-500">{errors.title.message}</p>
-        )}
-      </div>
-
-      <div>
-        <Textarea
-          placeholder="Campaign Description"
-          {...register("description", { required: "Description is required" })}
-        />
-        {errors.description && (
-          <p className="text-sm text-red-500">{errors.description.message}</p>
-        )}
-      </div>
-
-      <div>
-        <Input
-          type="number"
-          placeholder="Target Amount (UGX)"
-          {...register("targetAmount", { 
-            required: "Target amount is required",
-            min: { value: 10000, message: "Minimum amount is 10,000 UGX" }
-          })}
-        />
-        {errors.targetAmount && (
-          <p className="text-sm text-red-500">{errors.targetAmount.message}</p>
-        )}
-      </div>
-
-      <div>
-        <Input
-          placeholder="Location"
-          {...register("location", { required: "Location is required" })}
-        />
-        {errors.location && (
-          <p className="text-sm text-red-500">{errors.location.message}</p>
-        )}
-      </div>
-
-      <div>
-        <Input
-          placeholder="Category"
-          {...register("category", { required: "Category is required" })}
-        />
-        {errors.category && (
-          <p className="text-sm text-red-500">{errors.category.message}</p>
-        )}
-      </div>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <FormFields
+        formData={formData}
+        handleInputChange={handleInputChange}
+      />
+      
       <div className="space-y-2">
-        <div className="flex items-center gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={() => document.getElementById("campaign-image-edit")?.click()}
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Change Image
-          </Button>
-          <Input
-            id="campaign-image-edit"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
-          />
-        </div>
-        {previewImage && (
-          <div className="relative w-full h-40">
-            <img
-              src={previewImage}
-              alt="Campaign preview"
-              className="w-full h-full object-cover rounded-md"
-            />
-          </div>
-        )}
+        <label className="text-sm font-medium">Campaign Image</label>
+        <ImageUpload
+          currentImage={formData.image}
+          onImageUploaded={handleImageChange}
+        />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Updating..." : "Update Campaign"}
-      </Button>
+      <div className="flex justify-end space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Updating...' : 'Update Campaign'}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -89,6 +89,21 @@ export const api = {
       }
       return response.json();
     },
+    update: async (id: number, data: Partial<Campaign>) => {
+      const response = await fetch(`${API_URL}/campaigns/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update campaign');
+      }
+
+      return response.json();
+    },
   },
   categories: {
     list: async (): Promise<Category[]> => {
