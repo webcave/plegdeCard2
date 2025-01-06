@@ -14,7 +14,11 @@ const prisma = new PrismaClient({
 const app = express();
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'https://pledgewise-uganda.netlify.app',
+    'https://pledgecard.gepfinance.com'
+  ],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
