@@ -3,6 +3,7 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import path from 'path';
 
 dotenv.config();
 
@@ -12,8 +13,14 @@ const prisma = new PrismaClient({
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../../public_html')));
 
 // Campaign endpoints
 app.post('/api/campaigns', async (req, res) => {
@@ -70,21 +77,21 @@ app.get('/api/campaigns/:id', async (req, res) => {
 app.put('/api/campaigns/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, goal, category, location, image } = req.body;
-
-    const updatedCampaign = await prisma.campaign.update({
+    const { title, description, targetAmount, category, location, imageUrl } = req.body;
+    
+    const campaign = await prisma.campaign.update({
       where: { id: parseInt(id) },
       data: {
         title,
         description,
-        goal: parseFloat(goal),
+        targetAmount: parseInt(targetAmount),
         category,
         location,
-        image
-      }
+        imageUrl
+      },
     });
 
-    res.json(updatedCampaign);
+    res.json(campaign);
   } catch (error) {
     console.error('Error updating campaign:', error);
     res.status(500).json({ error: 'Failed to update campaign' });
@@ -325,7 +332,15 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../../public_html/index.html'));
+  }
+});
+
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3002;
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

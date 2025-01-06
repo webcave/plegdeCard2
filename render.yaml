@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: pledgewise-api
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
