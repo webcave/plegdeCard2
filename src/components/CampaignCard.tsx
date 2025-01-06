@@ -82,8 +82,13 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <DialogTrigger asChild>
             <Button className="w-full">Contribute</Button>
           </DialogTrigger>
-          <DialogContent>
-            <ContributeForm campaign={campaign} />
+          <DialogContent className="sm:max-w-[500px]">
+            <div className="space-y-4">
+              <div className="text-lg font-semibold">
+                Contribute to {campaign.title}
+              </div>
+              <ContributeForm campaignId={campaign.id} />
+            </div>
           </DialogContent>
         </Dialog>
       </CardFooter>
