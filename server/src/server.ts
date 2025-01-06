@@ -80,11 +80,11 @@ app.put('/api/campaigns/:id', async (req, res) => {
     const { title, description, targetAmount, category, location, imageUrl } = req.body;
     
     const campaign = await prisma.campaign.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
         title,
         description,
-        targetAmount: parseInt(targetAmount),
+        targetAmount: parseFloat(targetAmount),
         category,
         location,
         imageUrl
