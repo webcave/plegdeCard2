@@ -16,6 +16,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'https://jade-meringue-d415f7.netlify.app',
     'https://pledgewise-uganda.netlify.app',
     'https://pledgecard.gepfinance.com'
   ],
