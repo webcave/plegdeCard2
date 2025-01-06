@@ -1,0 +1,185 @@
+import { Campaign } from "@/types/campaign";
+
+const API_URL = 'http://localhost:3002/api';
+
+interface ContributionData {
+  amount: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  message?: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface Location {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface Contribution {
+  // Assuming this interface is defined elsewhere, if not, you'll need to define it
+}
+
+interface ContributionWithCampaign extends Contribution {
+  campaign: {
+    title: string;
+    code: string;
+  };
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt?: string;
+}
+
+interface SignupData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export const api = {
+  campaigns: {
+    list: async (): Promise<Campaign[]> => {
+      const response = await fetch(`${API_URL}/campaigns`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaigns');
+      }
+      return response.json();
+    },
+    create: async (campaign: Omit<Campaign, 'id' | 'currentAmount' | 'createdAt' | 'updatedAt'>): Promise<Campaign> => {
+      const response = await fetch(`${API_URL}/campaigns`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campaign),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create campaign');
+      }
+      return response.json();
+    },
+    get: async (id: string): Promise<Campaign> => {
+      const response = await fetch(`${API_URL}/campaigns/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaign');
+      }
+      return response.json();
+    },
+    contribute: async (campaignId: string, data: ContributionData): Promise<any> => {
+      const response = await fetch(`${API_URL}/campaigns/${campaignId}/contribute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to process contribution');
+      }
+      return response.json();
+    },
+  },
+  categories: {
+    list: async (): Promise<Category[]> => {
+      const response = await fetch(`${API_URL}/categories`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      return response.json();
+    },
+    create: async (data: Omit<Category, 'id'>): Promise<Category> => {
+      const response = await fetch(`${API_URL}/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create category');
+      }
+      return response.json();
+    },
+    delete: async (id: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/categories/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete category');
+      }
+    },
+  },
+  locations: {
+    list: async (): Promise<Location[]> => {
+      const response = await fetch(`${API_URL}/locations`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch locations');
+      }
+      return response.json();
+    },
+    create: async (data: Omit<Location, 'id'>): Promise<Location> => {
+      const response = await fetch(`${API_URL}/locations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create location');
+      }
+      return response.json();
+    },
+    delete: async (id: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/locations/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete location');
+      }
+    },
+  },
+  contributions: {
+    list: async (): Promise<ContributionWithCampaign[]> => {
+      const response = await fetch(`${API_URL}/contributions`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch contributions');
+      }
+      return response.json();
+    },
+  },
+  users: {
+    signup: async (data: SignupData): Promise<User> => {
+      const response = await fetch(`${API_URL}/users/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to sign up');
+      }
+      return response.json();
+    },
+    list: async (): Promise<User[]> => {
+      const response = await fetch(`${API_URL}/users`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      return response.json();
+    },
+  },
+};

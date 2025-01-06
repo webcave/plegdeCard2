@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id              String   @id @default(uuid())
+  title           String
+  code            String   @unique
+  description     String
+  targetAmount    Float
+  currentAmount   Float    @default(0)
+  organizerName   String
+  organizerContact String
+  location        String
+  category        String
+  imageUrl        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  contributions   Contribution[]
+}
+
+model Contribution {
+  id          String   @id @default(uuid())
+  amount      Float
+  name        String
+  email       String
+  phoneNumber String
+  message     String?
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Pledge {
+  id          Int      @id @default(autoincrement())
+  name        String
+  amount      Float
+  email       String
+  phoneNumber String
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
