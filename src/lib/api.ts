@@ -1,7 +1,7 @@
 import { Campaign } from "@/types/campaign";
 
 // API configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://pledgewise-api.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://pledgewise-api.onrender.com';
 
 interface ContributionData {
   amount: number;
@@ -51,14 +51,14 @@ interface SignupData {
 export const api = {
   campaigns: {
     list: async (): Promise<Campaign[]> => {
-      const response = await fetch(`${API_URL}/campaigns`);
+      const response = await fetch(`${API_URL}/api/campaigns`);
       if (!response.ok) {
         throw new Error('Failed to fetch campaigns');
       }
       return response.json();
     },
     create: async (campaign: Omit<Campaign, 'id' | 'currentAmount' | 'createdAt' | 'updatedAt'>): Promise<Campaign> => {
-      const response = await fetch(`${API_URL}/campaigns`, {
+      const response = await fetch(`${API_URL}/api/campaigns`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,14 +71,14 @@ export const api = {
       return response.json();
     },
     get: async (id: string): Promise<Campaign> => {
-      const response = await fetch(`${API_URL}/campaigns/${id}`);
+      const response = await fetch(`${API_URL}/api/campaigns/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch campaign');
       }
       return response.json();
     },
     contribute: async (campaignId: string, data: ContributionData): Promise<any> => {
-      const response = await fetch(`${API_URL}/campaigns/${campaignId}/contribute`, {
+      const response = await fetch(`${API_URL}/api/campaigns/${campaignId}/contribute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export const api = {
       return response.json();
     },
     update: async (id: number, data: Partial<Campaign>) => {
-      const response = await fetch(`${API_URL}/campaigns/${id}`, {
+      const response = await fetch(`${API_URL}/api/campaigns/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -108,14 +108,14 @@ export const api = {
   },
   categories: {
     list: async (): Promise<Category[]> => {
-      const response = await fetch(`${API_URL}/categories`);
+      const response = await fetch(`${API_URL}/api/categories`);
       if (!response.ok) {
         throw new Error('Failed to fetch categories');
       }
       return response.json();
     },
     create: async (data: Omit<Category, 'id'>): Promise<Category> => {
-      const response = await fetch(`${API_URL}/categories`, {
+      const response = await fetch(`${API_URL}/api/categories`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export const api = {
       return response.json();
     },
     delete: async (id: string): Promise<void> => {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
+      const response = await fetch(`${API_URL}/api/categories/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -138,14 +138,14 @@ export const api = {
   },
   locations: {
     list: async (): Promise<Location[]> => {
-      const response = await fetch(`${API_URL}/locations`);
+      const response = await fetch(`${API_URL}/api/locations`);
       if (!response.ok) {
         throw new Error('Failed to fetch locations');
       }
       return response.json();
     },
     create: async (data: Omit<Location, 'id'>): Promise<Location> => {
-      const response = await fetch(`${API_URL}/locations`, {
+      const response = await fetch(`${API_URL}/api/locations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export const api = {
       return response.json();
     },
     delete: async (id: string): Promise<void> => {
-      const response = await fetch(`${API_URL}/locations/${id}`, {
+      const response = await fetch(`${API_URL}/api/locations/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -168,7 +168,7 @@ export const api = {
   },
   contributions: {
     list: async (): Promise<ContributionWithCampaign[]> => {
-      const response = await fetch(`${API_URL}/contributions`);
+      const response = await fetch(`${API_URL}/api/contributions`);
       if (!response.ok) {
         throw new Error('Failed to fetch contributions');
       }
@@ -177,7 +177,7 @@ export const api = {
   },
   users: {
     signup: async (data: SignupData): Promise<User> => {
-      const response = await fetch(`${API_URL}/users/signup`, {
+      const response = await fetch(`${API_URL}/api/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export const api = {
       return response.json();
     },
     list: async (): Promise<User[]> => {
-      const response = await fetch(`${API_URL}/users`);
+      const response = await fetch(`${API_URL}/api/users`);
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
