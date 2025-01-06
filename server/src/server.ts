@@ -13,6 +13,12 @@ const prisma = new PrismaClient({
 
 const app = express();
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -56,14 +62,15 @@ app.get('/api/campaigns', async (req, res) => {
     res.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
-    res.status(500).json({ error: 'Error fetching campaigns', details: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ error: 'Failed to fetch campaigns' });
   }
 });
 
 app.get('/api/campaigns/:id', async (req, res) => {
   try {
+    const { id } = req.params;
     const campaign = await prisma.campaign.findUnique({
-      where: { id: req.params.id },
+      where: { id: id },
       include: {
         contributions: true
       }
@@ -74,7 +81,7 @@ app.get('/api/campaigns/:id', async (req, res) => {
     res.json(campaign);
   } catch (error) {
     console.error('Error fetching campaign:', error);
-    res.status(500).json({ error: 'Error fetching campaign', details: error instanceof Error ? error.message : String(error) });
+    res.status(500).json({ error: 'Failed to fetch campaign' });
   }
 });
 

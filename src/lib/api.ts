@@ -1,7 +1,7 @@
 import { Campaign } from "@/types/campaign";
 
 // API configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://pledgewise-api.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://pledgewise-api.onrender.com/api';
 
 interface ContributionData {
   amount: number;
