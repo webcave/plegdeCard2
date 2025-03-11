@@ -2,8 +2,9 @@ services:
   - type: web
     name: pledgewise-api
     env: node
-    buildCommand: npm install --prefix server && npm run build --prefix server
-    startCommand: node server/dist/server.js
+    repo: https://github.com/webcave/plegdeCard2.git
+    buildCommand: ls -la && npm install --prefix ./server && npm run build --prefix ./server
+    startCommand: node ./server/dist/server.js
     envVars:
       - key: NODE_VERSION
         value: 18.20.4
